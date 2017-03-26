@@ -2,7 +2,6 @@
  :source-paths #{"src" "test"}
  :dependencies '[[org.clojure/clojure "1.8.0" :scope "provided"]
                  [adzerk/bootlaces "0.1.13" :scope "test"]
-                 [ch.qos.logback/logback-classic "1.2.1"]
                  [org.clojure/java.jmx "0.3.3"]
                  [metrics-clojure "2.9.0"]
                  [riemann-clojure-client "0.4.4"]
@@ -20,7 +19,7 @@
 
 (task-options! pom {:project 'defunkt/metrics-riemann-reporter
                     :version +version+
-                    :description "Metrics reporter pushing events via riemann."
+                    :description "Reporting JMX metrics to riemann aggregator."
                     :url "https://github.com/mbuczko/metrics-riemann-reporter"
                     :scm {:url "https://github.com/mbuczko/metrics-riemann-reporter"}
                     :license {"name" "Eclipse Public License"
