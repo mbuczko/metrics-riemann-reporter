@@ -1,14 +1,14 @@
-(ns reporter-test
+(ns reporter.core-test
   (:require [clojure.test :refer :all]
             [clojure.java.jmx :as jmx]
-            [reporter :refer :all]))
+            [reporter.core :refer :all]))
 
 (def mocked-metrics {:Count 1 :OneMinuteRate  2 :FiveMinuteRate 3})
 
 (deftest events-generator-test
   (with-redefs [jmx/mbean (fn [metric] mocked-metrics)]
-    (let [beans [{:metric "metrics:name=foo" :attrs [:Count] :tags ["pool"] :event "foo-ev"}
-                 {:metric "metrics:name=bar" :attrs [:OneMinuteRate :FiveMinuteRate] :event "bar-ev" :tags ["baz"]}]
+    (let [beans [{:mbean "metrics:name=foo" :metrics [:Count] :tags ["pool"] :event "foo-ev"}
+                 {:mbean "metrics:name=bar" :metrics [:OneMinuteRate :FiveMinuteRate] :event "bar-ev" :tags ["baz"]}]
           events (generate-events "foo" beans)]
 
       (testing "number of generated events"
@@ -26,12 +26,12 @@
   (with-redefs [jmx/mbean (fn [metric] mocked-metrics)]
 
     (testing "provided service name"
-      (let [beans [{:metric "metrics:sample" :attrs [:Count] :event "ev"}]
+      (let [beans [{:mbean "metrics:sample" :metrics [:Count] :event "ev"}]
             event (first (generate-events "foo" beans))]
         (is (= "foo.ev.Count" (:service event)))))
 
     (testing "event-defined service name"
-      (let [beans [{:metric "metrics:sample" :attrs [:Count] :event "ev" :service "bar"}]
+      (let [beans [{:mbean "metrics:sample" :metrics [:Count] :event "ev" :service "bar"}]
             event (first (generate-events "foo" beans))]
         (is (= "bar.ev.Count" (:service event)))))))
 
@@ -39,17 +39,17 @@
   (with-redefs [jmx/mbean (fn [metric] mocked-metrics)]
 
     (testing "no tags"
-      (let [beans [{:metric "metrics:sample" :attrs [:Count] :event "ev"}]
+      (let [beans [{:mbean "metrics:sample" :metrics [:Count] :event "ev"}]
             event (first (generate-events "foo" beans))]
         (is (nil? (:tags event)))))
 
     (testing "event-defined tags"
-      (let [beans [{:metric "metrics:sample" :attrs [:Count] :event "ev" :service "bar" :tags ["baz"]}]
+      (let [beans [{:mbean "metrics:sample" :metrics [:Count] :event "ev" :service "bar" :tags ["baz"]}]
             event (first (generate-events "foo" beans))]
         (is (= "baz" (first (:tags event))))))))
 
 (deftest events-metrics-test
   (with-redefs [jmx/mbean (fn [metric] mocked-metrics)]
-    (let [beans [{:metric "metrics:sample" :attrs [:Count] :event "ev"}]
+    (let [beans [{:mbean "metrics:sample" :metrics [:Count] :event "ev"}]
           event (first (generate-events "foo" beans))]
       (is (= (:Count mocked-metrics) (:metric event))))))
