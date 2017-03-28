@@ -26,6 +26,8 @@ By default you may find there quite impressing amount of information:
 
 Imagine now that we will expose this way our own metrics and transform them into events periodically:
 
+![VisualVM 2](images/VisualVM_2.png?raw=true "Metrics exposed")
+
 Indeed, this is what `metrics-riemann-reporter` does.
 
 ## Ehmm... what it actually does?
