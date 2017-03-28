@@ -22,6 +22,7 @@ This is where JMX comes onto scene.
 Think of JMX as a collection of beans which you can ask for any information that your application (and JVM!) was able to expose.
 By default you may find there quite impressing amount of information:
 
+![VisualVM 1](images/VisualVM_1.png?raw=true "JMX mbeans")
 
 Imagine now that we will expose this way our own metrics and transform them into events periodically:
 
