@@ -4,9 +4,9 @@ Simple way to push JMX-based metrics to [Riemann](http://riemann.io/) aggregator
 
 ## Rationale
 
-_Things we don't measure in surprisinly often occur to be the most interesting ones._
+_Things we don't measure surprisinly often occur to be the most interesting ones._
 
-_Things we don't measure carefully enough surprisingly often are analyzed in "post-mortems"._
+_Things we don't measure carefully enough are analyzed later in "post-mortems"._
 
 Sounds familiar? Fear not, rescue is coming.
 
