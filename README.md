@@ -33,7 +33,7 @@ Indeed, this is what `metrics-riemann-reporter` does.
 ## Ehmm... what it actually does?
 
 Under the hood `metrics-riemann-reporter` makes use of metric library and its ability to register mbeans serving every single metric that we already defined.
-Having mbeans registered, separate thread polls it, once per 2 seconds by default, transforming each metric into event. As you may guess, finally events are sent to riemann aggregator.
+Having mbeans registered, separate thread polls them once per 2 seconds by default, transforming each metric into event. As you may guess, finally events are sent to riemann aggregator.
 
 ## How may I use that?
 
@@ -101,7 +101,7 @@ Unused reporter should be shut down:
 
 ## There is one more thing...
 
-To make things even easier reporter exposes 2 its own mbeans by default:
+To make things even easier reporter exposes its own 2 mbeans by default:
 
  - `java.lang:name=Cpu` with attribute `:CpuUsed` reporting current CPU usage
  - `java.lang:name=Heap` with attributes `:HeapInit`, `:HeapUsed`, `:HeapMax` and `:HeapComitted` reporting heap memory usage
