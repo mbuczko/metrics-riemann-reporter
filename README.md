@@ -1,4 +1,6 @@
-# metrics-riemann-reporter
+# metrics-riemann-reporter 
+
+[![Clojars Project](https://img.shields.io/clojars/v/defunkt/metrics-riemann-reporter.svg)](https://clojars.org/defunkt/metrics-riemann-reporter)
 
 Simple way to push JMX-based metrics to [Riemann](http://riemann.io/) aggregator. 
 
