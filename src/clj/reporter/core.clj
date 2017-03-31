@@ -1,11 +1,12 @@
 (ns reporter.core
-  (:require [riemann.client :as riemann]
-            [clojure.java.jmx :as jmx]
-            [reporter.beans :refer [init-cpu-bean init-heap-bean]])
-  (:import pl.defunkt.CpuHeapUsage
-           com.codahale.metrics.JmxReporter
+  (:require [clojure.java.jmx :as jmx]
+            [reporter.beans
+             :refer
+             [init-cpu-mbean init-heap-mbean unregister-cpu-heap-mbeans]]
+            [riemann.client :as riemann])
+  (:import com.codahale.metrics.JmxReporter
            io.riemann.riemann.client.RiemannClient
-           java.net.InetAddress))
+           pl.defunkt.CpuHeapUsage))
 
 (defn- riemann-client*
   [{:keys [host port]}]
@@ -28,7 +29,7 @@
   "Generates list of riemann events based on provided beans definition.
   Each bean definition is a following map:
 
-   {:mbean   \"JMX-mbean\"
+   {:mbean   \"JMX-mbean-name\"
     :event   \"event-name\"
     :service \"optional-service-name\"
     :metrics [:mbean-attribute-1 :mbean-attribute-2 ...]
@@ -43,39 +44,48 @@
   (let [events (generate-events service beans)]
     (riemann/send-events (riemann-client riemann-config) events)))
 
-(defn init-periodic
+(defn init-poller
   "Schedules a function f to be run periodically at given interval."
 
   [f interval]
   (.scheduleAtFixedRate scheduler f 3000 interval java.util.concurrent.TimeUnit/MILLISECONDS))
 
-(defn stop-periodic
+(defn stop-poller
   "Stops periodically run function."
 
-  [periodic]
-  (when periodic
-    (.cancel periodic false)))
+  [poller]
+  (when poller
+    (.cancel poller false)))
 
-(defn init-reporter [riemann-config metrics-registry service beans & interval]
+(defn init-reporter
+  "Initializes metrics, CPU and Heap mbeans.
+  Starts polling function which transforms mbeans values into riemann events.
+  Having riemann-config provided sends events to riemann aggregator."
+
+  [riemann-config metrics-registry service beans & interval]
   (let [ch-usage (CpuHeapUsage. jmx/*connection*)
-        reporter (JmxReporter/forRegistry metrics-registry)
-        heap-ref (init-heap-bean ch-usage)
-        cpu-ref  (init-cpu-bean ch-usage)
-        periodic (init-periodic
+        builder  (JmxReporter/forRegistry metrics-registry)
+        heap-ref (init-heap-mbean ch-usage)
+        cpu-ref  (init-cpu-mbean ch-usage)
+        poller   (init-poller
                   (fn []
                     (dosync
                      (alter cpu-ref  assoc :CpuUsed (.getCpuUsed ch-usage))
                      (alter heap-ref assoc :HeapUsed (.getHeapUsed ch-usage)))
                     (when riemann-config
                       (send-events riemann-config service beans)))
-                  (or interval 2000))]
+                  (or interval 2000))
+        reporter  (.build builder)]
 
-    (-> reporter
-        (.build)
-        (.start))
+    (.start reporter)
+    {:jmx-reporter reporter
+     :poller poller}))
 
-    {:reporter reporter
-     :periodic periodic}))
+(defn shutdown-reporter
+  "Unregisters metrics, CPU and Heap mbeans.
+  Stops polling function."
 
-(defn shutdown-reporter [reporter]
-  (stop-periodic (:periodic reporter)))
+  [{:keys [jmx-reporter poller]}]
+  (unregister-cpu-heap-mbeans)
+  (stop-poller poller)
+  (.close jmx-reporter))
