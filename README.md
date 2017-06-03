@@ -4,14 +4,6 @@
 
 Simple way to push JMX-based metrics to [Riemann](http://riemann.io/) aggregator. 
 
-## Rationale
-
-_Things we don't measure surprisinly often occur to be the most interesting ones._
-
-_Things we don't measure carefully enough are analyzed later in "post-mortems"._
-
-Sounds familiar? Fear not, rescue is coming.
-
 ## Riemann? JMX?
 
 Riemann is unique and elegant way of aggregating incoming events and pushing them futher into (almost) whatever store has been invented so far.
@@ -91,7 +83,7 @@ and resulting event will look like this:
      :tags nil}
 ```
      
-Where the service name came from? It's combined of 3 elements: _service name_, _event_ and _metric_ where the service name is provided as argument of `init-reporter` or may be set up in each bean definition separately (and has a priority over a former one).
+Where the service name comes from? It's combined of 3 elements: _service name_, _event_ and _metric_ where the service name is provided as argument of `init-reporter` or may be set up in each bean definition separately (and has a priority over a former one).
 
 Additionally each bean may define its own vector of `tags` which might be used during events aggregation by riemann.
 
